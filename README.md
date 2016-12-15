@@ -1,23 +1,31 @@
-Entity Framework
-===
-Entity Framework is Microsoft's recommended data access technology for new applications in .NET.
+Entity Framework Core
+=====================
 
-Travis: [![Travis build Status](https://travis-ci.org/aspnet/EntityFramework.svg?branch=dev)](https://travis-ci.org/aspnet/EntityFramework) (CoreCLR only, no SQL Server)
+Documentation on using EF Core is available at <https://docs.efproject.net>.
 
-AppVeyor: [![AppVeyor](https://ci.appveyor.com/api/projects/status/v9xbkondjev2gkhn/branch/dev?svg=true)](https://ci.appveyor.com/project/aspnetci/entityframework/branch/dev)
+[![Travis build status](https://img.shields.io/travis/aspnet/EntityFramework.svg?label=travis-ci&branch=dev&style=flat-square)](https://travis-ci.org/aspnet/EntityFramework/branches)
+[![AppVeyor build status](https://img.shields.io/appveyor/ci/aspnetci/EntityFramework/dev.svg?label=appveyor&style=flat-square)](https://ci.appveyor.com/project/aspnetci/entityframework/branch/dev)
 
-Documentation on using EF7 is available at [https://ef.readthedocs.org](https://ef.readthedocs.org).
+## EF Core here, EF6 elsewhere
 
-## EF7 here, EF6 on CodePlex
+This project is for Entity Framework Core. Entity Framework 6.x is still under active development at https://github.com/aspnet/EntityFramework6.
 
-This project is for Entity Framework 7, which is currently in pre-release. Entity Framework 6.x is the latest stable release of EF and still under active development on CodePlex at http://entityframework.codeplex.com/.
+## What is EF Core?
 
-## Entity Framework 7
+Entity Framework (EF) Core is a lightweight and extensible version of the popular Entity Framework data access technology.
 
-Entity Framework 7 (EF7) provides a familiar developer experience to previous versions of EF, including LINQ, POCO, and Code First support. EF7 also enables access to data across relational and non-relational stores. EF7 is much more lightweight than previous versions and is built from the ground up to work great in the cloud (using ASP.NET 5) on devices (i.e. in universal Windows apps) as well as in traditional .NET scenarios.
+EF Core is an object-relational mapper (O/RM) that enables .NET developers to work with a database using .NET objects. It eliminates the need for most of the data-access code that developers usually need to write. 
 
-## Getting Started
-See the ["Getting Started"](https://ef.readthedocs.org/en/latest/getting-started/) guides in the EF documentation for tutorials on using EF7.
+## Database Providers
+
+The source for SQL Server, SQLite, and InMemory providers are included in this project. Additional providers are available.
+For a complete list, see https://docs.efproject.net/en/latest/providers/.
+
+Provider               | Package name                              | Stable (`master` branch)    | Nightly (`dev` branch)
+-----------------------|-------------------------------------------|-----------------------------|-------------------------
+SQL Server             | `Microsoft.EntityFrameworkCore.SqlServer` | [![NuGet](https://img.shields.io/nuget/v/Microsoft.EntityFrameworkCore.SqlServer.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer/) | [![MyGet](https://img.shields.io/dotnet.myget/aspnetcore-dev/vpre/Microsoft.EntityFrameworkCore.SqlServer.svg?style=flat-square&label=myget)](https://dotnet.myget.org/feed/aspnetcore-dev/package/nuget/Microsoft.EntityFrameworkCore.SqlServer)
+SQLite                 | `Microsoft.EntityFrameworkCore.SQLite`    | [![NuGet](https://img.shields.io/nuget/v/Microsoft.EntityFrameworkCore.SqlServer.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/) | [![MyGet](https://img.shields.io/dotnet.myget/aspnetcore-dev/vpre/Microsoft.EntityFrameworkCore.Sqlite.svg?style=flat-square&label=myget)](https://dotnet.myget.org/feed/aspnetcore-dev/package/nuget/Microsoft.EntityFrameworkCore.Sqlite)
+InMemory (for testing) | `Microsoft.EntityFrameworkCore.InMemory`  | [![NuGet](https://img.shields.io/nuget/v/Microsoft.EntityFrameworkCore.InMemory.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.InMemory/) | [![MyGet](https://img.shields.io/dotnet.myget/aspnetcore-dev/vpre/Microsoft.EntityFrameworkCore.InMemory.svg?style=flat-square&label=myget)](https://dotnet.myget.org/feed/aspnetcore-dev/package/nuget/Microsoft.EntityFrameworkCore.InMemory)
 
 ## Roadmap
-EF 7 is currently pre-release. For more details on the release schedule, see the [**Roadmap**](https://github.com/aspnet/EntityFramework/wiki/Roadmap) article in the wiki.
+For more details on the release schedule, see the [**Roadmap**](https://github.com/aspnet/EntityFramework/wiki/Roadmap) article in the wiki.

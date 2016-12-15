@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 
 // ReSharper disable once CheckNamespace
-
 namespace System
 {
     [DebuggerStepThrough]
@@ -47,7 +46,7 @@ namespace System
         public static PropertyInfo GetAnyProperty(this Type type, string name)
         {
             var props = type.GetRuntimeProperties().Where(p => p.Name == name).ToList();
-            if (props.Count() > 1)
+            if (props.Count > 1)
             {
                 throw new AmbiguousMatchException();
             }
@@ -82,11 +81,23 @@ namespace System
                && !type.IsInterface
                && (!type.IsGenericType || !type.IsGenericTypeDefinition);
 
+        public static bool IsGrouping(this Type type) => IsGrouping(type.GetTypeInfo());
+
+        private static bool IsGrouping(TypeInfo type)
+            => type.IsGenericType
+               && (type.GetGenericTypeDefinition() == typeof(IGrouping<,>)
+                   || type.GetGenericTypeDefinition() == typeof(IAsyncGrouping<,>));
+
         public static Type UnwrapEnumType(this Type type)
         {
             var isNullable = type.IsNullableType();
-            type = isNullable ? type.UnwrapNullableType() : type;
-            var underlyingEnumType = type.GetTypeInfo().IsEnum ? Enum.GetUnderlyingType(type) : type;
+            var underlyingNonNullableType = isNullable ? type.UnwrapNullableType() : type;
+            if (!underlyingNonNullableType.GetTypeInfo().IsEnum)
+            {
+                return type;
+            }
+
+            var underlyingEnumType = Enum.GetUnderlyingType(underlyingNonNullableType);
             return isNullable ? MakeNullable(underlyingEnumType) : underlyingEnumType;
         }
 
@@ -110,9 +121,9 @@ namespace System
         {
             if (!type.GetTypeInfo().IsGenericTypeDefinition)
             {
-                var types = GetGenericTypeImplementations(type, interfaceOrBaseType).ToArray();
+                var types = GetGenericTypeImplementations(type, interfaceOrBaseType).ToList();
 
-                return types.Length == 1 ? types[0].GetTypeInfo().GenericTypeArguments.FirstOrDefault() : null;
+                return types.Count == 1 ? types[0].GetTypeInfo().GenericTypeArguments.FirstOrDefault() : null;
             }
 
             return null;
@@ -145,6 +156,16 @@ namespace System
             }
         }
 
+        public static IEnumerable<Type> GetTypesInHierarchy(this Type type)
+        {
+            while (type != null)
+            {
+                yield return type;
+
+                type = type.GetTypeInfo().BaseType;
+            }
+        }
+
         public static ConstructorInfo GetDeclaredConstructor(this Type type, Type[] types)
         {
             types = types ?? new Type[0];
@@ -161,7 +182,7 @@ namespace System
             {
                 var typeInfo = type.GetTypeInfo();
                 var propertyInfo = typeInfo.GetDeclaredProperty(name);
-                if ((propertyInfo != null)
+                if (propertyInfo != null
                     && !(propertyInfo.GetMethod ?? propertyInfo.SetMethod).IsStatic)
                 {
                     yield return propertyInfo;
@@ -169,6 +190,36 @@ namespace System
                 type = typeInfo.BaseType;
             }
             while (type != null);
+        }
+
+        public static IEnumerable<MemberInfo> GetMembersInHierarchy(this Type type, string name)
+        {
+            // Do the whole hierarchy for properties first since looking for fields is slower.
+            var currentType = type;
+            do
+            {
+                var typeInfo = currentType.GetTypeInfo();
+                var propertyInfo = typeInfo.GetDeclaredProperty(name);
+                if (propertyInfo != null
+                    && !(propertyInfo.GetMethod ?? propertyInfo.SetMethod).IsStatic)
+                {
+                    yield return propertyInfo;
+                }
+                currentType = typeInfo.BaseType;
+            }
+            while (currentType != null);
+
+            currentType = type;
+            do
+            {
+                var fieldInfo = currentType.GetRuntimeFields().FirstOrDefault(f => f.Name == name && !f.IsStatic);
+                if (fieldInfo != null)
+                {
+                    yield return fieldInfo;
+                }
+                currentType = currentType.GetTypeInfo().BaseType;
+            }
+            while (currentType != null);
         }
 
         private static readonly Dictionary<Type, object> _commonTypeDictionary = new Dictionary<Type, object>
@@ -206,9 +257,21 @@ namespace System
                 : Activator.CreateInstance(type);
         }
 
-        public static IEnumerable<TypeInfo> GetConstructibleTypes(this Assembly assembly)
-            => assembly.DefinedTypes.Where(
+        public static IEnumerable<TypeInfo> GetConstructableTypes(this Assembly assembly)
+            => assembly.GetLoadableDefinedTypes().Where(
                 t => !t.IsAbstract
-                    && !t.IsGenericTypeDefinition);
+                     && !t.IsGenericTypeDefinition);
+
+        public static IEnumerable<TypeInfo> GetLoadableDefinedTypes(this Assembly assembly)
+        {
+            try
+            {
+                return assembly.DefinedTypes;
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t != null).Select(IntrospectionExtensions.GetTypeInfo);
+            }
+        }
     }
 }
